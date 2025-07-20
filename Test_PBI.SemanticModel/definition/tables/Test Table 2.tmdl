@@ -1,0 +1,76 @@
+table 'Test Table 2'
+	lineageTag: 64c7d882-e68e-4919-89c8-de670723cc3e
+
+	column 'Week #'
+		dataType: int64
+		formatString: 0
+		lineageTag: 1d328cf7-4c00-433f-92da-0169e13f15af
+		summarizeBy: sum
+		sourceColumn: Week #
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month
+		dataType: string
+		lineageTag: f8e17501-1a45-4883-ace5-c2eed68c9f28
+		summarizeBy: none
+		sourceColumn: Month
+
+		annotation SummarizationSetBy = Automatic
+
+	column Week
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 4e033396-1424-4e84-a9ac-13106f8f911f
+		summarizeBy: none
+		sourceColumn: Week
+
+		variation Variation
+			isDefault
+			relationship: e3614282-1746-4f7d-b1bc-4b13a11fd811
+			defaultHierarchy: LocalDateTable_cb4b6ab8-5bf4-43c8-94ef-8b4659b632b4.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Creative
+		dataType: string
+		lineageTag: 6ed927f4-77f7-4941-8f60-30ef71980d24
+		summarizeBy: none
+		sourceColumn: Creative
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value
+		dataType: decimal
+		formatString: \$#,0.###############;-\$#,0.###############;\$#,0.###############
+		lineageTag: 08a20f8b-14c0-4ee1-b91c-100031083d7f
+		summarizeBy: sum
+		sourceColumn: Value
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-CA"}
+
+	column Campaign
+		dataType: string
+		lineageTag: b61c65d7-599c-41d8-9eec-19dae69eda27
+		summarizeBy: none
+		sourceColumn: Campaign
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Test Table 2' = m
+		mode: import
+		source =
+				let
+					FilePath = "Test Table 2.csv",
+					Source = Csv.Document(File.Contents(FilePath),[Delimiter=",", Columns=6, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+					#"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+					#"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"Week #", Int64.Type}, {"Month", type text}, {"Week", type date}, {"Creative", type text}, {"Value", Currency.Type}, {"Campaign", type text}})
+				in
+					#"Changed Type"
+
+	annotation PBI_ResultType = Table
+
